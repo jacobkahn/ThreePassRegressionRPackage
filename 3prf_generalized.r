@@ -29,7 +29,7 @@ autoProxy = function(y, X, L=1) {
 
 estimate.3PRF = function(x, y, ...) {
   N = ncol(X)
-  T = nrow(X) - lag
+  G = nrow(X) - lag
   
   #variance standardize to unit SD if not already standardized
   #standardize = sd(as.vector(as.matrix(X)))
@@ -48,13 +48,13 @@ estimate.3PRF = function(x, y, ...) {
   if(elements(L)==1) {
     Z = autoProxy(y, X, L)
     phi = data.frame(matrix(NA, nrow = 0, ncol = L)) 
-    F = data.frame(matrix(NA, nrow = 0, ncol = L)) 
+    B = data.frame(matrix(NA, nrow = 0, ncol = L)) 
   }
   else {
     L = data.frame(L)
     Z = data.frame(L[((lag+1):nrow(L)),])
     phi = data.frame(matrix(NA, nrow = 0, ncol = ncol(L))) 
-    F = data.frame(matrix(NA, nrow = 0, ncol = ncol(L))) 
+    B = data.frame(matrix(NA, nrow = 0, ncol = ncol(L))) 
   }
   
   #Step 1: Run time series regression of Xi on Z for each i = 1, ... ,N
@@ -74,16 +74,16 @@ estimate.3PRF = function(x, y, ...) {
 
   model <- lm(y ~ . , data = f)
 
-  #Step 2: Run cross section regressions of Xt on phi for t = 1, ... , T
-  for (i in 1:T) {
+  #Step 2: Run cross section regressions of Xt on phi for t = 1, ... , G
+  for (i in 1:G) {
     step2 = lm(t(x[i,]) ~ . , data = data.frame(phi)) ######
     placeholder = data.frame(step2$coefficients)[-1,]
-    F = data.frame(rbind(F, placeholder))
+    B = data.frame(rbind(B, placeholder))
   }
 
 
 
-  #Step 3: Run time series regression of yt+lag on predictive factors F
-  threePRF = lm(y ~ . , data = F)
-  return(list(model.3PRF = threePRF, step2 = F, step1 = phi, standardize = standardize))
+  #Step 3: Run time series regression of yt+lag on predictive factors B
+  threePRF = lm(y ~ . , data = B)
+  return(list(model.3PRF = threePRF, step2 = B, step1 = phi, standardize = standardize))
 }
