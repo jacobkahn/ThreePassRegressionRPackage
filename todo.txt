@@ -1,0 +1,11 @@
+Package Intro
+Descriptions for each of its functions:
+  - estimate.3PRF
+  - forecast.3PRF
+  - rollcast.3PRF
+  - recursivecast.3PRF
+  
+Meet With Jacob
+
+
+Get Ilya's function
