@@ -31,6 +31,71 @@ autoProxy = function(y, X, L=1) {
   return(proxies)
 }
 
+#Estimates 3PRF model
+#y is a vector of your RHS variables, X is a matrix/dataframe of your X variables
+#L is a dataframe of proxies or an integer if you would like to generate L automatic proxies
+#lag is an integer describing how many periods you would like to forecast ahead
+estimate.3PRF = function(x, y, L, lag = 0) {
+  N = ncol(X)
+  G = nrow(X) - lag
+  
+  #variance standardize to unit SD if not already standardized
+  standardize = sd(as.vector(as.matrix(X)))
+  X = X/standardize
+  
+  #chops off from data based on lag
+   y = y[(lag+1):elements(y)]
+    if(lag != 0) {
+    for (i in 1:lag) {  
+      X = X[-nrow(X),]
+    }
+}
+  X = data.frame(X)
+  
+  #generates autoproxies if user enters a scalar for L
+  if(elements(L)==1) {
+    Z = autoProxy(y, X, L)
+    phi = data.frame(matrix(NA, nrow = 0, ncol = L)) 
+    B = data.frame(matrix(NA, nrow = 0, ncol = L)) 
+  }
+  else {
+    L = data.frame(L)
+    Z = data.frame(L[((lag+1):nrow(L)),])
+    phi = data.frame(matrix(NA, nrow = 0, ncol = ncol(L))) 
+    B = data.frame(matrix(NA, nrow = 0, ncol = ncol(L))) 
+  }
+  
+  #Step 1: Run time series regression of Xi on Z for each i = 1, ... ,N
+  for (i in 1:N) {
+    step1 = lm(X[,i] ~ . , data = Z)
+    placeholder = data.frame(step1$coefficients)[-1,]
+    phi = data.frame(rbind(phi,placeholder))  #these might not work
+  }
+
+  phi <- do.call("rbind", lapply(1:ncol(x), function(idx, X = x, Proxies = proxies) {
+    (lm(X[,idx] ~ Proxies))$coef[-1]
+  }))
+
+  f <- do.call("rbind", lapply(1:nrow(x), function(idx, X = x, Phi = phi){
+    lm(X[idx,] ~ Phi)$coefficients[-1]
+  }))
+
+  model <- lm(y ~ . , data = f)
+
+  #Step 2: Run cross section regressions of Xt on phi for t = 1, ... , G
+  for (i in 1:G) {
+    step2 = lm(t(x[i,]) ~ . , data = data.frame(phi)) ######
+    placeholder = data.frame(step2$coefficients)[-1,]
+    B = data.frame(rbind(B, placeholder))
+  }
+
+
+
+  #Step 3: Run time series regression of yt+lag on predictive factors B
+  threePRF = lm(y ~ . , data = B)
+  return(list(model.3PRF = threePRF, step2 = B, step1 = phi, standardize = standardize))
+}
+
 #model is the list object from the estimate.3PRF function
 #X is a dataframe of regressors you'll use to forecast 
 #obviously, should be the same variables as you used to estimate the model
@@ -44,8 +109,8 @@ forecast.3PRF = function(model, X) {
     H = data.frame(rbind(F, placeholder))
   }
   #   forecast = predict(model$model.3PRF, F, interval = "prediction") predict() is a POS function
-  intercept = rep(1,nrow(F))
-  newF = data.frame(cbind(intercept,F))
+  intercept = rep(1,nrow(H))
+  newF = data.frame(cbind(intercept,H))
   coefficients = model$model.3PRF$coefficients
   prediction = as.matrix(newF) %*% as.matrix(coefficients)
   se = summary(model$model.3PRF)$sigma
