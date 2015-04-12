@@ -1,0 +1,12 @@
+Comment Code
+Documentation for package "3PRF"
+Package Intro
+Descriptions for each of its functions:
+  - autoProxy
+  - estimate.3PRF
+  - forecast.3PRF
+  - rollcast.3PRF
+  - recursivecast.3PRF
+
+
+Check with Ilya 
