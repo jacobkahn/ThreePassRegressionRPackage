@@ -1,0 +1,22 @@
+
+		Information on package ‘3PRF’
+
+Description:
+
+Package:       3PRF
+Version:       1.0
+Priority:      base
+Title:         The ThreePassRegressionFilter R Package
+Author:        Louis Yang, Alex Izydorczyk, Ben Barton, Jacob Kahn, Lawrence Chan
+Maintainer:    ???
+Description:   R functions for Kelly and Pruit's Three Pass Regression Filter
+Imports:       None
+License:       
+Built:         
+
+Index:
+autoProxy             Automatically generates proxies
+estimate.3PRF         Estimates a 3PRF model and returns a triple containing the model, values of the coefficients from step 1 and step 2  
+forecast.3PRF         Forecasts variables based on an input model and returns a forecast
+rollcast.3PRF         Restimates the input model and computes a new forcast ever period, using a rolling window
+recursivecast.3PRF    Restimates the input model and computes a new forcast ever period, using recursive estimation
