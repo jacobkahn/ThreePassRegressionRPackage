@@ -23,7 +23,7 @@ autoProxy = function(y, X, L=1) {
 #lag is an integer describing how many periods you would like to forecast ahead
 estimate.3PRF = function(y, X, L, lag = 0) {
   N = ncol(X)
-  T = nrow(X) - lag
+  G = nrow(X) - lag
   
   #variance standardize to unit SD if not already standardized
   standardize = sd(as.vector(as.matrix(X)))
@@ -73,12 +73,12 @@ estimate.3PRF = function(y, X, L, lag = 0) {
 #obviously, should be the same variables as you used to estimate the model
 forecast.3PRF = function(model, X) {
   X = X/model$standardize #this might be an issue do you include new OB?? I don't think so but I'm not sure
-  T = nrow(X)
-  F = data.frame(matrix(NA, nrow = 0, ncol = length(model$model.3PRF$coefficients)- 1))
+  G = nrow(X)
+  H = data.frame(matrix(NA, nrow = 0, ncol = length(model$model.3PRF$coefficients)- 1))
   for (i in 1:T) {
     step2 = lm(t(X[i,]) ~ . , data=model$step1) ######
     placeholder = data.frame(step2$coefficients)[-1,]
-    F = data.frame(rbind(F, placeholder))
+    H = data.frame(rbind(F, placeholder))
   }
   #   forecast = predict(model$model.3PRF, F, interval = "prediction") predict() is a POS function
   intercept = rep(1,nrow(F))
